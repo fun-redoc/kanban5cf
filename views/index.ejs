@@ -1,0 +1,45 @@
+<!-- views/index.ejs -->
+<!doctype html>
+<html>
+
+<head>
+  <title>Node Authentication</title>
+  <link rel="stylesheet" 
+        href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> 
+    <!-- load bootstrap css -->
+  </link>
+  <link rel="stylesheet" 
+        href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> 
+    <!-- load fontawesome -->
+  </link>
+  <style>
+     body        { padding-top:80px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="jumbotron text-center">
+      <h1>
+        <span class="fa fa-lock"/>
+        Node Authentication <%= process.env.PORT %> -- <%= config.server.host %>:<%= config.server.port %>
+      </h1>
+<p><%= JSON.stringify(config) %></p>    <p>Local Login or Register with:</p>
+
+      <a href="/login" class="btn btn-default">
+        <span class="fa fa-user">Local Login</span>
+      </a>
+
+      <a href="/signup" class="btn btn-default">
+        <span class="fa fa-user">Local Signup</span>
+      </a>
+
+      <p>Login with Google:</p>
+      <a href="/auth/google" class="btn btn-danger">
+        <span class="fa fa-google-plus"> Google</span>
+      </a>
+
+    </div>
+  </div>
+</body>
+</html>
