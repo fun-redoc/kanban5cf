@@ -20,37 +20,18 @@ var httpsCert = fs.readFileSync('./keys/fun.redoc.test.cert.pem');
 var assert = require("assert");
 var Promise = require("promise");
 
+var app = require("./app")(passport);
+var db = require("./db")(config.todoDB.uri);
 
-var app = express();
-
-// connect db
-mongoose.connect(config.todoDB.uri);
 
 // passport
 require("./config/passport")(passport);
 
-// setup pipeline
-app.use(morgan("dev"));  // log every request to the console
-app.use(cookieParser()); // read cookies
-app.use(bodyParser());   // get information from body (html forms encoded)
+// routes
+require("./app/routes.js")(app, passport, db); // load routes
 
-app.set("view engine", "ejs"); // ejs for templating
-
-// required for passwport
-app.use(session({secret:"thesessionsecretTODOgenerateRandomly" })); // secret session
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());  // use connect-flash for flash messages stored in session
-
-
-// open db and create a premise
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log("DB opened");
-
-  // routes
-  require("./app/routes.js")(app, passport, db); // load routes
 
   // launch app
   //var options = {

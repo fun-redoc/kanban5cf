@@ -5,13 +5,100 @@
 // /signup - signup
 //
 var express  = require("express");
+var jsonMaper = require("json-mapper");
 var config   = require("../config/env");
-var query    = require("./queryParams");
+var queryParams    = require("./queryParams");
 //var mongoose = require("mongoose");
 var Todo = require("./models/todo.js");
 
 module.exports = function(app, passport, db) {
   "use strict";
+
+  var taskConverter = jsonMaper.makeConverter({
+    __metadata : {
+                  uri: function(input) {
+                        if(input._id) {
+                          return "http://localhost:8080/api/test/Tasks(".concat(input._id).concat(")");
+                        }
+                       },
+                  type : function(intput) {
+                           return "S1.Task";
+                         }
+                },
+      _id : '_id',
+      ID : '_id',
+      Name: 'Name',
+      EntryDate: function(input) {
+        if(!input.EntryDate) {
+          return;
+        } else {
+          return "/Date(".concat(JSON.stringify(input.EntryDate.getTime())).concat(")/");
+        }
+      },
+      DueDate: function(input) {
+        if(!input.DueDate){
+          return;
+        } else {
+          return "/Date(".concat(JSON.stringify(input.DueDate.getTime())).concat(")/");
+        }
+      },
+      Description: 'Description',
+      IsAssigned:'IsAssigned',
+      Assignee:'Assignee',
+      Status:'Status',
+      Priority: function(input) {
+        if(input.Priority) {
+          return input.Priority;
+        }
+      }
+  });
+
+
+  var odataConverter = jsonMaper.makeConverter( {
+    "d": {
+         "results": function(input) {
+                      if(input instanceof Array) {
+                          return input.map(function(task) {
+                            return taskConverter(task);
+                          });
+                      } else {
+                        return taskConverter(input);
+                      }
+                  },
+        "__count": function(input) {
+          return JSON.stringify(input.length);
+        }
+       }
+  });
+
+  var odataTask2Task = jsonMaper.makeConverter({
+    Name: 'Name',
+    DueDate: function(input) { 
+      if(!input.DueDate) { 
+        return; 
+      } else {
+        // TODO parse the Date and trasfer to js date format
+        return new Date();
+      }
+    },
+    EntryDate: function(input) { 
+      if(!input.EntryDate) { 
+        return; 
+      } else {
+        // TODO parse the Date and trasfer to js date format
+        return new Date();
+      }
+    },
+    Description:'Description',
+    Status: 'Status',
+    Priority: function(input) {
+      if(input.Priority) {
+        return parseFloat(input.Priority);
+      }
+    },
+    IsAssigned: 'IsAssigned',
+    Assignee: 'Assignee'
+  });
 
   var router = express.Router();
   app.use("/",router);
@@ -101,14 +188,137 @@ module.exports = function(app, passport, db) {
       res.redirect("/");
     });
 
-  //
+  // Tasks
+
+  router.route(/\/api\/test\/Tasks\((.+)\)/)
+    .post(function(req,res) {
+      var id = req.params[0];
+
+      if(!id) return res.status(500).end();
+
+      var XHTTPMethod = req.get('X-HTTP-Method');
+      if(!XHTTPMethod) return res.status(500).end();
+
+      console.log("Post Task", id, XHTTPMethod);
+
+      if(XHTTPMethod === 'MERGE') {
+        Todo.findByIdAndUpdate(id, odataTask2Task(req.body), null, function(err, task) {
+          if(err) return res.status(500).end();
+          console.log("body", req.body);
+          console.log("return", task);
+
+          res
+           .status(200)
+           .set("Content-Type", "application/json")
+           .set("DataServiceVersion", "2.0")
+           .json(odataConverter(task));
+
+        });
+      } else {
+        console.log("unknown method", XHTTPMethod);
+        // unknown method
+        return res.status(500).end();
+      }
+
+    })
+    .delete(function(req,res) {
+      var id = req.params[0];
+
+      if(!id) return res.status(500).end();
+
+      Todo.findByIdAndRemove(id, function(err, task) {
+        if(err) return res.status(500).end();
+
+        res
+         .status(200)
+         .set("Content-Type", "application/json")
+         .set("DataServiceVersion", "2.0")
+         .json(odataConverter(task));
+
+      });
+    })
+    .get(function(req,res) {
+      var id = req.params[0];
+
+      if(!id) return res.status(500).end();
+
+      Todo.findById(id, function(err, task) {
+        if(err) return res.status(500).end();
+
+        res
+         .status(200)
+         .set("Content-Type", "application/json")
+         .set("DataServiceVersion", "2.0")
+         .json(odataConverter(task));
+
+      });
+    });
+
   router.route("/api/test/Tasks/:cmd")
     .get( function(req,res) {
-      console.log("WITH COMMAND", req.query, req.params);
+      if( req.params.cmd === "$count" )  {
+        var query = null;
+        if(req.query.$filter) {
+          query = queryParams.parse(req.query.$filter);
+        } else {
+          query = {};
+        }
+        Todo.count(query, function(err, count) {
+          if(err) return console.erro(err);
+           res.status(200);
+           res.set('Content-Type', 'text/plain;charset=utf-8');
+           res.send(count.toString());
+        });
+      } else {
+        res.status(500).send(config.params.cmd.concat(" not known."));
+      }
     });
+
   router.route("/api/test/Tasks")
+    .post( function(req, res) {
+      var task = new Todo(odataTask2Task(req.body));
+      task.save(
+        function(err, data) {
+          if(err) {
+            res
+              .status(500)
+              .send(err); // TODO send less details in producetion
+          } else {
+            var odata = {"d" : { "results": data }};
+            res
+              .status(201)
+              .set("Content-Type", "application/json")
+              .set("DataServiceVersion", "2.0")
+              .json(odata);
+          }
+      });
+    })
     .get( function(req,res) {
-      console.log("WITHOUT COMMAND", req.query);
+      var query = null;
+      if(req.query.$filter) {
+        query = queryParams.parse(req.query.$filter);
+      } else {
+        query = {};
+      }
+      var q = Todo.find(query);
+      if(req.query.$skip) {
+        q.skip(parseInt(req.query.$skip));
+      }
+      if(req.query.$top) {
+        q.limit(parseInt(req.query.$top));
+      }
+      if(req.query.$orderby) {
+        q.sort(queryParams.parse(req.query.$orderby, {startRule: "SortExpression"}));
+      }
+      q.exec(function(err, tasks) {
+        if(err) return console.erro(err);
+
+        res
+         .status(200)
+         .set("Content-Type", "application/json")
+         .set("DataServiceVersion", "2.0")
+         .json(odataConverter(tasks));
+      });
     });
 
   // API Test with authentication

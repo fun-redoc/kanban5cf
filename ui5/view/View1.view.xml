@@ -5,7 +5,7 @@
 				<content>
 					<sap.ui.layout:Grid xmlns:sap.ui.layout="sap.ui.layout" id="__grid0" defaultSpan="XL3 L3 M12 S12">
 					    <sap.ui.layout:content xmlns:sap.ui.layout="sap.ui.layout">
-					        <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="Drop list items here" id="__listNew" items="{path: '/Tasks', filters: [{path:'Status', operator:'EQ', value1:'New'}, {path:'IsAssigned', operator:'EQ', value1:false}], sorter: { path: 'Priority', descending: false}}"> 
+                <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="{i18n>noData}" id="__listNew" items="{path: '/Tasks', filters: [{path:'Status', operator:'EQ', value1:'New'}, {path:'IsAssigned', operator:'EQ', value1:false}], sorter: { path: 'Priority', descending: false}}"> 
 					            <items>
 					                <NotificationListItem id="__item0_copy3" 
 					                                    type="Detail" 
@@ -37,7 +37,7 @@
 					                </Toolbar>
 					            </headerToolbar>
 					        </List>
-					        <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="Drop list items here" id="__listAssigned" items="{path: '/Tasks', filters: [{path:'IsAssigned', operator:'EQ', value1:true}], sorter: { path: 'Priority', descending: false}}" itemPress="" delete="onTaskCompleted" mode="Delete">
+					        <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="{i18n>noData}" id="__listAssigned" items="{path: '/Tasks', filters: [{path:'IsAssigned', operator:'EQ', value1:true}], sorter: { path: 'Priority', descending: false}}" itemPress="" delete="onTaskCompleted" mode="Delete">
 					            <items>
 					                <NotificationListItem id="__item0_copy4a" 
 					                					  type="DetailAndActive" 
@@ -70,7 +70,7 @@
 					                
 					            </headerToolbar>
 					        </List>
-					        <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="Drop list items here" id="__listInWork" items="{path: '/Tasks', filters: [{path:'Status', operator:'EQ', value1:'InWork'}, {path:'IsAssigned', operator:'EQ', value1:false}], sorter: { path: 'Priority', descending: false}}" itemPress="" delete="onTaskCompleted" mode="Delete">
+					        <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="{i18n>noData}" id="__listInWork" items="{path: '/Tasks', filters: [{path:'Status', operator:'EQ', value1:'InWork'}, {path:'IsAssigned', operator:'EQ', value1:false}], sorter: { path: 'Priority', descending: false}}" itemPress="" delete="onTaskCompleted" mode="Delete">
 					            <items>
 					                <NotificationListItem id="__item0_copy4" type="DetailAndActive" 
 					                                   priority="{parts: ['DueDate'],formatter: '.formatPrio'}"
@@ -98,7 +98,7 @@
 					                
 					            </headerToolbar>
 					        </List>
-					        <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="Drop list items here" id="__listCompleted" items="{path: '/Tasks', filters: [{path:'Status', operator:'EQ', value1:'Completed'}], sorter: { path: 'Priority', descending: false}}">
+                  <List xmlns="sap.m" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc" noDataText="{i18n>noData}" id="__listCompleted" items="{path: '/Tasks', filters: [{path:'Status', operator:'EQ', value1:'Completed'}], sorter: { path: 'Priority', descending: false}}">
 					            <items>
 					                <NotificationListItem id="__item0_copy5" type="Navigation" 
 					                					counter="0" 

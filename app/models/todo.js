@@ -3,7 +3,8 @@ var Schema   = mongoose.Schema;
 
 var todoSchema = new Schema( {
   Name : String,
-  DueData : Date,
+  DueDate : Date,
+  EntryDate : Date,
   Description : String,
   Status      : String,
   Priority    : Number,

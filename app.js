@@ -1,58 +1,41 @@
-// https://ict.swisscom.ch/2015/12/move-with-your-mongodb-node-js-into-the-cloud/
-var config = require("./config/env");
+// app.js
+//
+// setup
+// var config = require("./config/env");
+// var port = config.server.port;// process.env.PORT || 8080;
+// var https = require('https');
+// var http = require('https');
+// var fs = require('fs');
+var express = require("express");
+// var mongoose = require("mongoose");
+// var passport = require("passport");
+var flash = require("connect-flash");
+var morgan = require("morgan");
+var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
+var session = require("express-session");
+// var httpsKey = fs.readFileSync('./keys/fun.redoc.test.key.pem');
+// var httpsCert = fs.readFileSync('./keys/fun.redoc.test.cert.pem');
+//var mongoClient = require("mongodb").MongoClient;
+// var assert = require("assert");
+// var Promise = require("promise");
 
-var express = require("express"); 
-var app = express();
-var mongoClient = require("mongodb").MongoClient;
-var assert = require("assert");
 
-console.log(__dirname);
-app.use(express.static(__dirname + "/static", {
-      dotfiles: "ignore",
-      etag: true,
-      extensions:false,
-      falltrhrough:true,
-      index:"index.html",
-      lastModified:true,
-      maxAge: 0, // 30*60000, // 30 minutes
-      redirect:true
-   })
-);
+module.exports = function(passport) {
+  var app = express();
 
-app.get("/html/todo/list", function(req, res) {
-  //mongoClient.connect("mongodb://localhost:27017/todoDB", 
-  mongoClient.connect(config.todoDB.uri, 
-      function(err, db) {
-        assert.equal(err, null);
+  // setup pipeline
+  app.use(morgan("dev"));  // log every request to the console
+  app.use(cookieParser()); // read cookies
+  app.use(bodyParser());   // get information from body (html forms encoded)
 
-        res.writeHead(200, {"Content-Type" : "text/html"}); 
-        res.write("<html><body>");
-        res.write("<h1>TODO's</h1>");
-        res.write("<ul>");
-        
-        var collection = db.collection("todos");
-        collection.find({}).each(function(err,obj) {
-          if( obj ) {
-            assert.equal(err, null);
-            res.write("<li>");
-            res.write(obj.name);
-            res.write("</li>");
-            return true;
-          } else {
-            res.write("</ul>");
-            res.write("</body></html>");
-            res.end();
-            db.close() ;
-            return false;
-          }
-        });
-        
-      });
-});
+  app.set("view engine", "ejs"); // ejs for templating
 
-//var port = process.env.PORT || 3000;
-//app.listen(port);
+  // required for passwport
+  app.use(session({secret:"thesessionsecretTODOgenerateRandomly" })); // secret session
+  app.use(passport.initialize());
+  app.use(passport.session());
+  app.use(flash());  // use connect-flash for flash messages stored in session
 
-app.listen(config.server.port, function() {
-  console.log("server starting host ", config.server.port);
-});
+  return app;
+};

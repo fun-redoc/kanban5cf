@@ -13,19 +13,19 @@ gulp.task("test", function() {
 
 gulp.task('compilePegjs', function() {
     return gulp.src('app/*.pegjs')
-               .pipe(pegjs())
+               .pipe(pegjs({"allowedStartRules":["Start", "QueryExpression","SortExpression"]}))
+               //.pipe(pegjs())
                .pipe(concat.header("module.exports = "))
-               .pipe(gulp.dest('src'));
+               .pipe(gulp.dest('app'));
 });
 
 gulp.task("watchForPegJs", function() {
-  gulp.watch("**/*.pegjs", ["compilePegjs"]);
+  gulp.watch("app/**/*.pegjs", {interval:1000}, ["compilePegjs"]);
 });
 
-// watch
-gulp.task("watchForTest", function() {
-  gulp.watch('**/*.js', ['test']);
+gulp.task("watchForJs", function() {
+  gulp.watch(['!node_modules/**/*.js', '**/*.js'], {interval:500}, ['test']);
 });
 
 // the default task
-gulp.task("default", ["watchForPegJs", 'watchForTest']);
+gulp.task("default", ["test","watchForPegJs", 'watchForJs']);

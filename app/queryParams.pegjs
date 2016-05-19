@@ -4,6 +4,15 @@
  * ==========================
  */
 
+Start
+ = QueryExpression / SortExpression
+
+SortExpression
+ = idProperty:Identifier _ dir:("asc" / "desc"){
+   var obj = {}
+   obj[idProperty] = (dir === "asc" ? 1 : -1);
+   return obj;
+ }
 
 QueryExpression
   = term:QueryTerm term2:(_ "and" _ QueryTerm)* {

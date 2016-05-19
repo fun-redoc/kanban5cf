@@ -46,6 +46,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "kanban5/utils/clone"], function(Co
 					console.log("assign", context.getObject());
 					if (model.hasPendingChanges()) {
 						console.log("there are pending changes");
+            // TODO the callback functions (error are not called!)
 						model.submitChanges({
 							success: function() {
 								console.log("success submitting changes", arguments);
@@ -53,6 +54,22 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "kanban5/utils/clone"], function(Co
 							},
 							error: function() {
 								console.log("failed subbmitting changes", arguments);
+                model.refresh(true);
+                // TODO show less detailed errors to user
+                sap.m.MessageToast.show(oError.responseText, {
+                      duration: 3000,                  // default
+                      width: "15em",                   // default
+                      my: "center center",             // default
+                      at: "center center",             // default
+                      of: window,                      // default
+                      offset: "0 0",                   // default
+                      collision: "fit fit",            // default
+                      onClose: null,                   // default
+                      autoClose: true,                 // default
+                      animationTimingFunction: "ease", // default
+                      animationDuration: 1000,         // default
+                      closeOnBrowserNavigation: true   // default
+                });
 							}
 						});
 					}
@@ -111,6 +128,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "kanban5/utils/clone"], function(Co
 						console.log("no next item");
 					}
 
+					console.log("prevPrio", prevPrio, "nextPrio", nextPrio);
 					var droppedPrio = 0.5 * (prevPrio + nextPrio);
 					console.log("droppedPrio", droppedPrio);
 					droppedObject.Priority = droppedPrio;
@@ -169,6 +187,22 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "kanban5/utils/clone"], function(Co
 							},
 							error: function() {
 								console.log("failed subbmitting changes", arguments);
+                model.refresh(true);
+                // TODO show less detailed errors to user
+                sap.m.MessageToast.show(oError.responseText, {
+                      duration: 3000,                  // default
+                      width: "15em",                   // default
+                      my: "center center",             // default
+                      at: "center center",             // default
+                      of: window,                      // default
+                      offset: "0 0",                   // default
+                      collision: "fit fit",            // default
+                      onClose: null,                   // default
+                      autoClose: true,                 // default
+                      animationTimingFunction: "ease", // default
+                      animationDuration: 1000,         // default
+                      closeOnBrowserNavigation: true   // default
+                });
 							}
 						});
 					}
@@ -197,8 +231,23 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "kanban5/utils/clone"], function(Co
 				}.bind(this),
 				error: function(oError) {
 					console.log("error", oError);
-					// TODO show errors to user
-				}
+          model.refresh(true);
+					// TODO show less detailed errors to user
+          sap.m.MessageToast.show(oError.responseText, {
+                duration: 3000,                  // default
+                width: "15em",                   // default
+                my: "center center",             // default
+                at: "center center",             // default
+                of: window,                      // default
+                offset: "0 0",                   // default
+                collision: "fit fit",            // default
+                onClose: null,                   // default
+                autoClose: true,                 // default
+                animationTimingFunction: "ease", // default
+                animationDuration: 1000,         // default
+                closeOnBrowserNavigation: true   // default
+          });
+				}.bind(this)
 			});
 		},
 
