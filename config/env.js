@@ -18,6 +18,7 @@ if (env === 'production') {
         uri: uri
       },
       server: {
+        ssl: false,
         host: appHost,
         port: process.env.PORT || 8080,
         outerPort: 80 // outer port needed for cloud foundy, to be able to callback google auth
@@ -35,9 +36,10 @@ if (env === 'production') {
           uri: 'mongodb://localhost:27017/todoDB',
         },
         server: {
+          ssl: true,
           host: '127.0.0.1',
-          port:  process.env.PORT || 8080,
-          outerPort: 8080
+          port:  8843,
+          outerPort: 8843
         },
         paths: {
           contentPath: path.join(__dirname, '/mime/')

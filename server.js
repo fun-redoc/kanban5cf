@@ -53,14 +53,17 @@ db.once('open', function() {
   require("./app/routes.js")(app, passport, db); // load routes
 
   // launch app
-  //var options = {
-  //  key:httpsKey,
-  //  cert:httpsCert
-  //};
-  //var httpsServer = https.createServer(options, app);
-  //httpsServer.listen(port);
-  app.listen(port);
-  console.log("server started on port", port);
+  if( config.server.ssl ) {
+    var options = {
+      key:httpsKey,
+      cert:httpsCert
+    };
+    var httpsServer = https.createServer(options, app);
+    httpsServer.listen(port);
+  } else {
+    app.listen(port);
+    console.log("server started on port", port);
+  }
  
 });
 
