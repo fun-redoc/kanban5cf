@@ -18,6 +18,7 @@ module.exports = function(app, passport, db) {
     __metadata : {
                   uri: function(input) {
                         if(input._id) {
+                          // TODO hard coded url
                           return "http://localhost:8080/api/test/Tasks(".concat(input._id).concat(")");
                         }
                        },
@@ -191,7 +192,7 @@ module.exports = function(app, passport, db) {
   // Tasks
 
   router.route(/\/api\/test\/Tasks\((.+)\)/)
-    .post(function(req,res) {
+    .post(isLoggedInApi, function(req,res) {
       var id = req.params[0];
 
       if(!id) return res.status(500).end();
@@ -221,7 +222,7 @@ module.exports = function(app, passport, db) {
       }
 
     })
-    .delete(function(req,res) {
+    .delete( isLoggedInApi, function(req,res) {
       var id = req.params[0];
 
       if(!id) return res.status(500).end();
@@ -237,7 +238,7 @@ module.exports = function(app, passport, db) {
 
       });
     })
-    .get(function(req,res) {
+    .get( isLoggedInApi, function(req,res) {
       var id = req.params[0];
 
       if(!id) return res.status(500).end();
@@ -255,7 +256,7 @@ module.exports = function(app, passport, db) {
     });
 
   router.route("/api/test/Tasks/:cmd")
-    .get( function(req,res) {
+    .get( isLoggedInApi,  function(req,res) {
       if( req.params.cmd === "$count" )  {
         var query = null;
         if(req.query.$filter) {
@@ -275,7 +276,7 @@ module.exports = function(app, passport, db) {
     });
 
   router.route("/api/test/Tasks")
-    .post( function(req, res) {
+    .post( isLoggedInApi, function(req, res) {
       var task = new Todo(odataTask2Task(req.body));
       task.save(
         function(err, data) {
@@ -293,7 +294,7 @@ module.exports = function(app, passport, db) {
           }
       });
     })
-    .get( function(req,res) {
+    .get( isLoggedInApi, function(req,res) {
       var query = null;
       if(req.query.$filter) {
         query = queryParams.parse(req.query.$filter);
@@ -323,8 +324,8 @@ module.exports = function(app, passport, db) {
 
   // API Test with authentication
   router.route("/api/test/\\$metadata")
-   //.get(isLoggedIn, function(req,res) {
-   .get(function(req,res) {
+   .get(isLoggedInApi, function(req,res) {
+   //.get(function(req,res) {
       var options = {
         root: __dirname + "/../ui5/localService/",
         dotfiles: 'deny',
@@ -348,8 +349,8 @@ module.exports = function(app, passport, db) {
 
   // API Test with authentication
   router.route("/api/test")
-   //.get(isLoggedIn, function(req,res) {
-   .get(function(req,res) {
+   .get(isLoggedInApi, function(req,res) {
+   //.get(function(req,res) {
      //res.send("todo.ejs");
     // var todosCollection = db.collection("todos");
     // todosCollection.find({}).toArray(function(err, todos) {
@@ -389,3 +390,10 @@ function isLoggedIn(req, res, next) {
   res.redirect("/");
 }
 
+
+function isLoggedInApi(req, res, next) {
+  if( req.isAuthenticated() ) {
+    return next();
+  }
+  res.status(401).end();
+}

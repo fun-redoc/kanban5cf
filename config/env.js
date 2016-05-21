@@ -9,7 +9,7 @@ var servicesEnv = {};
 if (env === 'production') {  
   var vcap_services = JSON.parse(process.env.VCAP_SERVICES); // Get Environment variables from your App ; more at https://docs.developer.swisscom.com/apps/deploy-apps/environment-variable.html
   var vcap_application = JSON.parse(process.env.VCAP_APPLICATION); // Get Environment variables from your App ; more at https://docs.developer.swisscom.com/apps/deploy-apps/environment-variable.html
-  var uri = vcap_services.mongolab[0].credentials.uri; // Get the URI with the credekkkkk
+  var uri = vcap_services.mlab[0].credentials.uri; // Get the URI with the credekkkkk
   var appHost = vcap_application.application_uris[0];
   // Cloud Foundry
   config = {
