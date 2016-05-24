@@ -4,3 +4,12 @@ keys
 .DS_Store
 .aliases
 _site
+visual_ext_index.html
+/webapp/visual_ext_index.html
+UIAdaptation_index.html
+changes_preview.js
+mock_preview_sapui5.html
+.*/mock_preview_sapui5.html
+sap-ui-cachebuster-info.json
+extended_runnable_file.html
+.*/extended_runnable_file.html
