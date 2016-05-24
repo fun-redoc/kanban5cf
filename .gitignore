@@ -3,3 +3,4 @@ node_modules
 keys
 .DS_Store
 .aliases
+_site

@@ -1,5 +1,7 @@
 private
-private
 node_modules
 Gruntfile.js
 npm-debug.log
+_config.yml
+backlog.md
+_site.yml

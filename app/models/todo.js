@@ -2,6 +2,7 @@ var mongoose = require("mongoose");
 var Schema   = mongoose.Schema;
 
 var todoSchema = new Schema( {
+  ownerUserId: Schema.Types.ObjectId,
   Name : String,
   DueDate : Date,
   EntryDate : Date,

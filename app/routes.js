@@ -72,7 +72,10 @@ module.exports = function(app, passport, db) {
        }
   });
 
-  var odataTask2Task = jsonMaper.makeConverter({
+  var odataTask2Task = function(userId) {
+    console.log("unserId", userId);
+    return jsonMaper.makeConverter({
+    ownerUserId: function() { return userId; },
     Name: 'Name',
     DueDate: function(input) { 
       if(!input.DueDate) { 
@@ -100,6 +103,7 @@ module.exports = function(app, passport, db) {
     IsAssigned: 'IsAssigned',
     Assignee: 'Assignee'
   });
+  };
 
   var router = express.Router();
   app.use("/",router);
@@ -203,7 +207,7 @@ module.exports = function(app, passport, db) {
       console.log("Post Task", id, XHTTPMethod);
 
       if(XHTTPMethod === 'MERGE') {
-        Todo.findByIdAndUpdate(id, odataTask2Task(req.body), null, function(err, task) {
+        Todo.findByIdAndUpdate(id, odataTask2Task(req.user._id)(req.body), null, function(err, task) {
           if(err) return res.status(500).end();
           console.log("body", req.body);
           console.log("return", task);
@@ -227,16 +231,29 @@ module.exports = function(app, passport, db) {
 
       if(!id) return res.status(500).end();
 
-      Todo.findByIdAndRemove(id, function(err, task) {
-        if(err) return res.status(500).end();
-
-        res
-         .status(200)
-         .set("Content-Type", "application/json")
-         .set("DataServiceVersion", "2.0")
-         .json(odataConverter(task));
-
+      Todo.findById(id, function(err, task) {
+        if(err) return res.status(404).end();
+        if( req.user.id != task.ownerUserId ) return res.status(401).end();
+        task.remove(function(err, task) {
+          if(err) return res.status(500).end();
+          res
+           .status(200)
+           .set("Content-Type", "application/json")
+           .set("DataServiceVersion", "2.0")
+           .json(odataConverter(task));
+          });
       });
+
+      //Todo.findByIdAndRemove(id, function(err, task) {
+      //  if(err) return res.status(500).end();
+
+      //  res
+      //   .status(200)
+      //   .set("Content-Type", "application/json")
+      //   .set("DataServiceVersion", "2.0")
+      //   .json(odataConverter(task));
+
+      //});
     })
     .get( isLoggedInApi, function(req,res) {
       var id = req.params[0];
@@ -245,7 +262,7 @@ module.exports = function(app, passport, db) {
 
       Todo.findById(id, function(err, task) {
         if(err) return res.status(500).end();
-
+        if( req.user.id != task.ownerUserId ) return res.status(401).end();
         res
          .status(200)
          .set("Content-Type", "application/json")
@@ -264,6 +281,7 @@ module.exports = function(app, passport, db) {
         } else {
           query = {};
         }
+        query.ownerUserId = req.user.id;
         Todo.count(query, function(err, count) {
           if(err) return console.erro(err);
            res.status(200);
@@ -277,7 +295,7 @@ module.exports = function(app, passport, db) {
 
   router.route("/api/test/Tasks")
     .post( isLoggedInApi, function(req, res) {
-      var task = new Todo(odataTask2Task(req.body));
+      var task = new Todo(odataTask2Task(req.user._id)(req.body));
       task.save(
         function(err, data) {
           if(err) {
@@ -301,6 +319,7 @@ module.exports = function(app, passport, db) {
       } else {
         query = {};
       }
+      query.ownerUserId = req.user.id;
       var q = Todo.find(query);
       if(req.query.$skip) {
         q.skip(parseInt(req.query.$skip));
